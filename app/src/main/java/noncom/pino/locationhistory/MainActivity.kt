@@ -2,8 +2,10 @@ package noncom.pino.locationhistory
 
 import android.Manifest
 import android.content.Intent
-
 import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Bundle
 import android.widget.Toast
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -17,13 +19,15 @@ import androidx.navigation.ui.setupWithNavController
 import noncom.pino.locationhistory.databinding.ActivityMainBinding
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity: AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
 
+        // ======= window composition ==============
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -39,38 +43,69 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
-
-        // check if app has location & background location access permissions
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-            Toast.makeText(this, "ask for permission", Toast.LENGTH_SHORT).show()
-
-            ActivityCompat.requestPermissions(this@MainActivity, arrayOf(
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            ), 1)
-
-        } else { startLocationService() }
+        // =============================================
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onResume() {
+        super.onResume()
 
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
-
-            startLocationService()
-
-        } else { Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show() }
+        startTracking()
     }
+
+    private fun startTracking() {
+
+        // first, check for permission
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(
+                this@MainActivity, arrayOf(
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ), 1002
+            )
+        }
+
+        val locationManager = this@MainActivity.getSystemService(LOCATION_SERVICE) as LocationManager
+        val locationListener = LocationListener { location ->
+            Toast.makeText(
+                this@MainActivity,
+                "Current Location - ${location.latitude}:${location.longitude}",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+
+        try {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000L, 0f, locationListener)
+            Toast.makeText(this@MainActivity, "started requests", Toast.LENGTH_LONG).show()
+        }
+        catch (e: SecurityException) {
+
+            Toast.makeText(this@MainActivity, "exception: no permission!", Toast.LENGTH_SHORT).show()
+        }
+
+//
+//        // check if app has background location permission
+//        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+//            ActivityCompat.requestPermissions(this@MainActivity, arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION), 1001)
+//        }
+    }
+
+//    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+//
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+//
+//        if (grantResults.isEmpty() || grantResults.any { it == PackageManager.PERMISSION_DENIED }) {
+//
+//            Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show()
+//            // TODO: what to do if permissions are denied
+//        }
+//    }
 
     private fun startLocationService() {
 
         val serviceIntent = Intent(this, LocationService::class.java)
 
-        Toast.makeText(this, "starting locationService", Toast.LENGTH_SHORT).show()
         ContextCompat.startForegroundService(this, serviceIntent)
     }
 }
