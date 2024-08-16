@@ -2,8 +2,6 @@ package noncom.pino.locationhistory
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.location.LocationListener
-import android.location.LocationManager
 import android.os.Bundle
 import android.os.Looper
 import android.widget.Toast
@@ -15,12 +13,18 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequest
+import androidx.work.WorkManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import noncom.pino.locationhistory.databinding.ActivityMainBinding
+import java.util.concurrent.TimeUnit
 
 
 class MainActivity: AppCompatActivity() {
@@ -70,25 +74,9 @@ class MainActivity: AppCompatActivity() {
             )
         }
 
-        val locationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this@MainActivity)
+        val periodicWork = PeriodicWorkRequest.Builder(LocatingWorker::class.java, 15, TimeUnit.MINUTES).build()
 
-        val request = LocationRequest.Builder(5*1000L).build()
-        val locationCallback = object: LocationCallback() {
-
-            override fun onLocationResult(result: LocationResult) {
-                super.onLocationResult(result)
-                result.locations.lastOrNull()?.let { location ->
-
-                    Toast.makeText(
-                        this@MainActivity,
-                        "${location.latitude} : ${location.longitude}",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-            }
-        }
-
-        locationClient.requestLocationUpdates(request, locationCallback, Looper.getMainLooper())
+        WorkManager.getInstance(this@MainActivity).enqueueUniquePeriodicWork("Location", ExistingPeriodicWorkPolicy.UPDATE, periodicWork)
 
 //
 //        // check if app has background location permission

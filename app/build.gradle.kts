@@ -48,10 +48,20 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.androidx.recyclerview)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
     // google play services location (fused location provider)
     implementation(libs.play.services.location)
+
+    // work manager
+    implementation(libs.androidx.work.runtime.ktx)
+
+    // room (database)
+    implementation(libs.androidx.room.runtime)
+    annotationProcessor(libs.androidx.room.compiler)
+    // To use Kotlin Symbol Processing (KSP)
+    //ksp(libs.androidx.room.compiler) -> isnt recognized, idk why
 }
