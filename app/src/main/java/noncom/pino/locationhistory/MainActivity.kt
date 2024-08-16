@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
+import android.os.Looper
 import android.widget.Toast
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
@@ -14,6 +15,11 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
 import noncom.pino.locationhistory.databinding.ActivityMainBinding
 
 
@@ -64,23 +70,25 @@ class MainActivity: AppCompatActivity() {
             )
         }
 
-        val locationManager = this@MainActivity.getSystemService(LOCATION_SERVICE) as LocationManager
-        val locationListener = LocationListener { location ->
-            Toast.makeText(
-                this@MainActivity,
-                "Current Location - ${location.latitude}:${location.longitude}",
-                Toast.LENGTH_LONG
-            ).show()
+        val locationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this@MainActivity)
+
+        val request = LocationRequest.Builder(5*1000L).build()
+        val locationCallback = object: LocationCallback() {
+
+            override fun onLocationResult(result: LocationResult) {
+                super.onLocationResult(result)
+                result.locations.lastOrNull()?.let { location ->
+
+                    Toast.makeText(
+                        this@MainActivity,
+                        "${location.latitude} : ${location.longitude}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
         }
 
-        try {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000L, 0f, locationListener)
-            Toast.makeText(this@MainActivity, "started requests", Toast.LENGTH_LONG).show()
-        }
-        catch (e: SecurityException) {
-
-            Toast.makeText(this@MainActivity, "exception: no permission!", Toast.LENGTH_SHORT).show()
-        }
+        locationClient.requestLocationUpdates(request, locationCallback, Looper.getMainLooper())
 
 //
 //        // check if app has background location permission

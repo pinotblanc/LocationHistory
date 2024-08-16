@@ -53,5 +53,5 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     // google play services location (fused location provider)
-    // implementation(libs.play.services.location)
+    implementation(libs.play.services.location)
 }
