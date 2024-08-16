@@ -101,11 +101,4 @@ class MainActivity: AppCompatActivity() {
 //            // TODO: what to do if permissions are denied
 //        }
 //    }
-
-    private fun startLocationService() {
-
-        val serviceIntent = Intent(this, LocationService::class.java)
-
-        ContextCompat.startForegroundService(this, serviceIntent)
-    }
 }
