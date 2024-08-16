@@ -1,9 +1,7 @@
 package noncom.pino.locationhistory
 
 import android.Manifest
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
@@ -101,11 +99,4 @@ class MainActivity: AppCompatActivity() {
 //            // TODO: what to do if permissions are denied
 //        }
 //    }
-
-    private fun startLocationService() {
-
-        val serviceIntent = Intent(this, LocationService::class.java)
-
-        ContextCompat.startForegroundService(this, serviceIntent)
-    }
 }
