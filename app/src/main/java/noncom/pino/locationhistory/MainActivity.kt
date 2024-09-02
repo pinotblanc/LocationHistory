@@ -3,8 +3,6 @@ package noncom.pino.locationhistory
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.os.Looper
-import android.widget.Toast
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -13,16 +11,9 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.LocationServices
 import noncom.pino.locationhistory.databinding.ActivityMainBinding
 import java.util.concurrent.TimeUnit
 
@@ -74,25 +65,8 @@ class MainActivity: AppCompatActivity() {
             )
         }
 
+        // start periodic location fetching (15min interval)
         val periodicWork = PeriodicWorkRequest.Builder(LocatingWorker::class.java, 15, TimeUnit.MINUTES).build()
-
         WorkManager.getInstance(this@MainActivity).enqueueUniquePeriodicWork("Location", ExistingPeriodicWorkPolicy.UPDATE, periodicWork)
-
-//
-//        // check if app has background location permission
-//        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-//            ActivityCompat.requestPermissions(this@MainActivity, arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION), 1001)
-//        }
     }
-
-//    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-//
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-//
-//        if (grantResults.isEmpty() || grantResults.any { it == PackageManager.PERMISSION_DENIED }) {
-//
-//            Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show()
-//            // TODO: what to do if permissions are denied
-//        }
-//    }
 }

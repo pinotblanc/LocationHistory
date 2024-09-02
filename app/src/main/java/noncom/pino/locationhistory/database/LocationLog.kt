@@ -1,10 +1,11 @@
-package noncom.pino.locationhistory
+package noncom.pino.locationhistory.database
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity
-data class LocationEntry(
+
+@Entity(tableName = "logs")
+data class LocationLog(
 
     @PrimaryKey
     val timestamp: Long,
